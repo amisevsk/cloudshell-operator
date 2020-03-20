@@ -1,0 +1,11 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cloudshell-operator
+subjects:
+- kind: ServiceAccount
+  name: cloudshell-operator
+roleRef:
+  kind: Role
+  name: cloudshell-operator
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,7 @@
+apiVersion: cloudshell.eclipse.org/v1alpha1
+kind: CloudShell
+metadata:
+  name: example-cloudshell
+spec:
+  # Add fields here
+  size: 3
