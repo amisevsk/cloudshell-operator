@@ -1,0 +1,6 @@
+apiVersion: cloudshell.eclipse.org/v1alpha1
+kind: CloudShell
+metadata:
+  name: example-cloudshell
+spec:
+  image: quay.io/eclipse/che-sidecar-openshift-connector:0.1.2-2601509

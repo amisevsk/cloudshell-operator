@@ -2,6 +2,7 @@ package cloudshell
 
 import (
 	"context"
+	"github.com/go-logr/logr"
 	routeV1 "github.com/openshift/api/route/v1"
 
 	cloudshellv1alpha1 "github.com/che-incubator/cloudshell-operator/pkg/apis/cloudshell/v1alpha1"
@@ -17,6 +18,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
+
+type deployStatus struct {
+	Continue bool
+	Requeue  bool
+	Error    error
+}
+
+type reconcileContext struct {
+	instance *cloudshellv1alpha1.CloudShell
+	log      logr.Logger
+}
 
 var log = logf.Log.WithName("controller_cloudshell")
 
@@ -110,6 +122,11 @@ func (r *ReconcileCloudShell) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 
+	ctx := reconcileContext{
+		instance: instance,
+		log:      reqLogger,
+	}
+
 	if instance.Status.Id == "" {
 		id, err := getID(instance)
 		if err != nil {
@@ -119,6 +136,11 @@ func (r *ReconcileCloudShell) Reconcile(request reconcile.Request) (reconcile.Re
 		instance.Status.Id = id
 		err = r.client.Status().Update(context.TODO(), instance)
 		return reconcile.Result{Requeue: true}, err
+	}
+
+	networkStatus := r.reconcileRouting(ctx)
+	if !networkStatus.Continue {
+		return reconcile.Result{Requeue: networkStatus.Requeue}, networkStatus.Error
 	}
 
 	return reconcile.Result{}, nil
