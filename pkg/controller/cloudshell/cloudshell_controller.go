@@ -2,8 +2,10 @@ package cloudshell
 
 import (
 	"context"
+	routeV1 "github.com/openshift/api/route/v1"
 
 	cloudshellv1alpha1 "github.com/che-incubator/cloudshell-operator/pkg/apis/cloudshell/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -43,9 +45,32 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource Pods and requeue the owner CloudShell
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
+	// Watch for changes to secondary resources
+	err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &cloudshellv1alpha1.CloudShell{},
+	})
+	if err != nil {
+		return err
+	}
+
+	err = c.Watch(&source.Kind{Type: &routeV1.Route{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &cloudshellv1alpha1.CloudShell{},
+	})
+	if err != nil {
+		return err
+	}
+
+	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &cloudshellv1alpha1.CloudShell{},
+	})
+	if err != nil {
+		return err
+	}
+
+	err = c.Watch(&source.Kind{Type: &corev1.ServiceAccount{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &cloudshellv1alpha1.CloudShell{},
 	})
@@ -83,6 +108,17 @@ func (r *ReconcileCloudShell) Reconcile(request reconcile.Request) (reconcile.Re
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	if instance.Status.Id == "" {
+		id, err := getID(instance)
+		if err != nil {
+			// TODO: Fail
+			return reconcile.Result{}, err
+		}
+		instance.Status.Id = id
+		err = r.client.Status().Update(context.TODO(), instance)
+		return reconcile.Result{Requeue: true}, err
 	}
 
 	return reconcile.Result{}, nil

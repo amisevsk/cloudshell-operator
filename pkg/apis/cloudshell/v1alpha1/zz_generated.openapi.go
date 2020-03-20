@@ -88,6 +88,12 @@ func schema_pkg_apis_cloudshell_v1alpha1_CloudShellStatus(ref common.ReferenceCa
 				Description: "CloudShellStatus defines the observed state of CloudShell",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"id": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 					"ready": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"boolean"},
@@ -101,7 +107,7 @@ func schema_pkg_apis_cloudshell_v1alpha1_CloudShellStatus(ref common.ReferenceCa
 						},
 					},
 				},
-				Required: []string{"ready", "url"},
+				Required: []string{"id", "ready", "url"},
 			},
 		},
 	}

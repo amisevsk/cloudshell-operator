@@ -39,11 +39,14 @@ spec:
         status:
           description: CloudShellStatus defines the observed state of CloudShell
           properties:
+            id:
+              type: string
             ready:
               type: boolean
             url:
               type: string
           required:
+          - id
           - ready
           - url
           type: object

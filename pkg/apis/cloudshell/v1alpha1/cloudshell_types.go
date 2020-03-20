@@ -13,6 +13,7 @@ type CloudShellSpec struct {
 // CloudShellStatus defines the observed state of CloudShell
 // +k8s:openapi-gen=true
 type CloudShellStatus struct {
+	Id    string `json:"id"`
 	Ready bool   `json:"ready"`
 	Url   string `json:"url"`
 }
