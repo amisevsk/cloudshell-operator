@@ -143,5 +143,10 @@ func (r *ReconcileCloudShell) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{Requeue: networkStatus.Requeue}, networkStatus.Error
 	}
 
+	deploymentStatus := r.reconcileDeployment(ctx)
+	if !deploymentStatus.Continue {
+		return reconcile.Result{Requeue: deploymentStatus.Requeue}, deploymentStatus.Error
+	}
+
 	return reconcile.Result{}, nil
 }
