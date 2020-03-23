@@ -169,19 +169,32 @@ func getSpecPod(instance *v1alpha1.CloudShell) corev1.PodSpec {
 				ImagePullPolicy:          corev1.PullAlways,
 				TerminationMessagePolicy: corev1.TerminationMessageFallbackToLogsOnError,
 				Resources:                resources,
+				Args:                     []string{"tail", "-f", "/dev/null"}, // TODO: make configurable
+				Env: []corev1.EnvVar{
+					{
+						Name:  "CHE_MACHINE_NAME",
+						Value: "cloud-shell",
+					},
+				},
 			},
 			{
-				Name:  "machine-exec",
-				Image: "quay.io/eclipse/che-machine-exec:nightly",
+				Name:                     "machine-exec",
+				Image:                    "docker.io/amisevsk/che-machine-exec:dev",
+				Resources:                resources,
+				ImagePullPolicy:          corev1.PullAlways,
+				TerminationMessagePolicy: corev1.TerminationMessageFallbackToLogsOnError,
 				Ports: []corev1.ContainerPort{
 					{
 						ContainerPort: 4444,
 						Protocol:      corev1.ProtocolTCP,
 					},
 				},
-				Resources:                resources,
-				ImagePullPolicy:          corev1.PullAlways,
-				TerminationMessagePolicy: corev1.TerminationMessageFallbackToLogsOnError,
+				Env: []corev1.EnvVar{
+					{
+						Name:  "CHE_WORKSPACE_ID",
+						Value: instance.Status.Id,
+					},
+				},
 			},
 			{
 				Name:  "oauth-proxy",

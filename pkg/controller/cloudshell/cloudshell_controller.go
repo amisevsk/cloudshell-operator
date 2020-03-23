@@ -139,6 +139,10 @@ func (r *ReconcileCloudShell) Reconcile(request reconcile.Request) (reconcile.Re
 		log:      reqLogger,
 	}
 
+	prereqStatus := r.reconcilePrereqs(ctx)
+	if !prereqStatus.Continue {
+		return reconcile.Result{}, prereqStatus.Error
+	}
 
 	networkStatus := r.reconcileRouting(ctx)
 	if !networkStatus.Continue {

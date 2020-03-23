@@ -18,6 +18,7 @@ func getID(instance *v1alpha1.CloudShell) (string, error) {
 func getLabelsForID(id string) map[string]string {
 	return map[string]string{
 		"cloudshell.id": id,
+		"che.workspace_id": id,
 	}
 }
 
