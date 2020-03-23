@@ -122,11 +122,6 @@ func (r *ReconcileCloudShell) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err
 	}
 
-	ctx := reconcileContext{
-		instance: instance,
-		log:      reqLogger,
-	}
-
 	if instance.Status.Id == "" {
 		id, err := getID(instance)
 		if err != nil {
@@ -138,9 +133,21 @@ func (r *ReconcileCloudShell) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{Requeue: true}, err
 	}
 
+	reqLogger = reqLogger.WithValues("CloudShell.Id", instance.Status.Id)
+	ctx := reconcileContext{
+		instance: instance,
+		log:      reqLogger,
+	}
+
+
 	networkStatus := r.reconcileRouting(ctx)
 	if !networkStatus.Continue {
 		return reconcile.Result{Requeue: networkStatus.Requeue}, networkStatus.Error
+	}
+
+	serviceAcctStatus := r.reconcileServiceAcct(ctx)
+	if !serviceAcctStatus.Continue {
+		return reconcile.Result{Requeue: serviceAcctStatus.Requeue}, serviceAcctStatus.Error
 	}
 
 	deploymentStatus := r.reconcileDeployment(ctx)
